@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import DeployingView from './components/DeployingView';
 import ExplorerView from './components/ExplorerView/ExplorerView';
+import ScenarioRunnerPage from './components/ScenarioRunner/ScenarioRunnerPage';
+import { ScenarioProvider } from './contexts/ScenarioContext';
 import './index.css';
 
 function App() {
-  const [view, setView] = useState('loading'); // 'loading', 'deploying', or 'explorer'
+  const [view, setView] = useState('loading'); // 'loading', 'deploying', 'explorer', or 'scenario-runner'
   const [deployments, setDeployments] = useState([]);
 
   // Check for existing deployments on app startup
@@ -57,6 +59,14 @@ function App() {
     setView('explorer');
   };
 
+  const navigateToScenarioRunner = () => {
+    setView('scenario-runner');
+  };
+
+  const navigateToExplorer = () => {
+    setView('explorer');
+  };
+
   // Show loading state while checking for deployments
   if (view === 'loading') {
     return (
@@ -71,13 +81,20 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {view === 'deploying' ? (
-        <DeployingView onDeploymentComplete={handleDeploymentComplete} />
-      ) : (
-        <ExplorerView initialDeployments={deployments} />
-      )}
-    </div>
+    <ScenarioProvider>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        {view === 'deploying' ? (
+          <DeployingView onDeploymentComplete={handleDeploymentComplete} />
+        ) : view === 'explorer' ? (
+          <ExplorerView 
+            initialDeployments={deployments} 
+            onNavigateToScenarioRunner={navigateToScenarioRunner} 
+          />
+        ) : view === 'scenario-runner' ? (
+          <ScenarioRunnerPage onNavigateBack={navigateToExplorer} />
+        ) : null}
+      </div>
+    </ScenarioProvider>
   );
 }
 

@@ -5,6 +5,10 @@ import TabNavigation from './Tabs/TabNavigation';
 import TabContent from './Tabs/TabContent';
 import DiamondView from './DiamondView';
 import DashboardView from './DashboardView';
+import ScenariosTab from './TabPanels/ScenariosTab';
+import NewScenarioEditor from '../ScenarioRunner/NewScenarioEditor';
+import ScenarioEditor from '../ScenarioRunner/ScenarioEditor';
+import ScenarioRunnerPage from '../ScenarioRunner/ScenarioRunnerPage';
 import TransactionDetailModal from '../Modal/TransactionDetailModal';
 import './ExplorerView.css';
 
@@ -22,7 +26,7 @@ const isDiamondContract = (deployment) => {
     );
 };
 
-const ExplorerView = ({ initialDeployments }) => {
+const ExplorerView = ({ initialDeployments, onNavigateToScenarioRunner }) => {
   const [allDeployments, setAllDeployments] = useState(initialDeployments || []);
   const [filteredDeployments, setFilteredDeployments] = useState(initialDeployments || []);
   const [selectedDeployment, setSelectedDeployment] = useState(null);
@@ -36,7 +40,7 @@ const ExplorerView = ({ initialDeployments }) => {
   const [loading, setLoading] = useState(true);
   
   // View state
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'contract', 'contracts', 'transactions', 'events'
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'contract', 'contracts', 'transactions', 'events', 'scenarios', 'new-scenario', 'edit-scenario', 'scenario-runner'
   
   // Transaction modal state
   const [showTransactionModal, setShowTransactionModal] = useState(false);
@@ -45,6 +49,9 @@ const ExplorerView = ({ initialDeployments }) => {
   // Diamond-specific state
   const [selectedFacet, setSelectedFacet] = useState(null);
   const [isDiamondView, setIsDiamondView] = useState(false);
+  
+  // Scenario editor state
+  const [selectedScenarioName, setSelectedScenarioName] = useState(null);
 
   useEffect(() => {
     if (initialDeployments && initialDeployments.length > 0) {
@@ -160,6 +167,49 @@ const ExplorerView = ({ initialDeployments }) => {
     setIsDiamondView(false);
   };
 
+  const handleNavigateToScenarios = () => {
+    setCurrentView('scenarios');
+    setSelectedDeployment(null);
+    setSelectedFacet(null);
+    setIsDiamondView(false);
+  };
+
+  const handleNavigateToScenarioRunner = () => {
+    setCurrentView('scenario-runner');
+    setSelectedDeployment(null);
+    setSelectedFacet(null);
+    setIsDiamondView(false);
+  };
+
+  // Scenario editor navigation handlers
+  const handleNavigateToNewScenario = () => {
+    setCurrentView('new-scenario');
+    setSelectedDeployment(null);
+    setSelectedFacet(null);
+    setIsDiamondView(false);
+    setSelectedScenarioName(null);
+  };
+
+  const handleNavigateToEditScenario = (scenarioName) => {
+    setCurrentView('edit-scenario');
+    setSelectedDeployment(null);
+    setSelectedFacet(null);
+    setIsDiamondView(false);
+    setSelectedScenarioName(scenarioName);
+  };
+
+  const handleScenarioSaved = (scenarioName) => {
+    // After saving, navigate back to scenarios view
+    setCurrentView('scenarios');
+    setSelectedScenarioName(null);
+  };
+
+  const handleScenarioCancel = () => {
+    // Cancel editing, go back to dashboard
+    setCurrentView('dashboard');
+    setSelectedScenarioName(null);
+  };
+
   const renderMainContent = () => {
     if (loading) {
       return (
@@ -193,6 +243,8 @@ const ExplorerView = ({ initialDeployments }) => {
               onNavigateToContracts={handleNavigateToContracts}
               onNavigateToTransactions={handleNavigateToTransactions}
               onNavigateToEvents={handleNavigateToEvents}
+              onNavigateToScenarios={handleNavigateToScenarios}
+              onNavigateToScenarioRunner={handleNavigateToScenarioRunner}
               onSelectDeployment={handleSelectDeployment}
             />
           </div>
@@ -313,10 +365,23 @@ const ExplorerView = ({ initialDeployments }) => {
               </div>
               
               <div className="text-center py-16">
-                <i className="fas fa-exchange-alt text-6xl text-gray-600 mb-4"></i>
-                <h3 className="text-xl text-gray-400 mb-2">Transaction History</h3>
-                <p className="text-gray-500">Transaction history will be displayed here.</p>
-                <p className="text-gray-500 text-sm mt-2">This feature will be implemented with API integration.</p>
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="fas fa-exchange-alt text-white text-2xl"></i>
+                </div>
+                <h3 className="text-2xl font-semibold text-white mb-4">Transaction History</h3>
+                <p className="text-gray-400 text-lg mb-4">View transactions from individual contract pages</p>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  Transaction details are available when viewing specific contracts. Select a contract from the sidebar to see its transaction history.
+                </p>
+                <div className="mt-8">
+                  <button
+                    onClick={handleNavigateToContracts}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center mx-auto transition-colors"
+                  >
+                    <i className="fas fa-file-contract mr-2"></i>
+                    View Contracts
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -341,12 +406,85 @@ const ExplorerView = ({ initialDeployments }) => {
               </div>
               
               <div className="text-center py-16">
-                <i className="fas fa-bell text-6xl text-gray-600 mb-4"></i>
-                <h3 className="text-xl text-gray-400 mb-2">Event Logs</h3>
-                <p className="text-gray-500">Event logs will be displayed here.</p>
-                <p className="text-gray-500 text-sm mt-2">This feature will be implemented with API integration.</p>
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="fas fa-bell text-white text-2xl"></i>
+                </div>
+                <h3 className="text-2xl font-semibold text-white mb-4">Event Logs</h3>
+                <p className="text-gray-400 text-lg mb-4">Monitor events from individual contracts</p>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  Event monitoring and filtering are available when viewing specific contracts. Select a contract to monitor its events in real-time.
+                </p>
+                <div className="mt-8">
+                  <button
+                    onClick={handleNavigateToContracts}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center mx-auto transition-colors"
+                  >
+                    <i className="fas fa-file-contract mr-2"></i>
+                    View Contracts
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
+        );
+
+      case 'scenarios':
+        return (
+          <div className="flex-1 overflow-auto p-4">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-white">
+                  <i className="fas fa-play-circle text-primary mr-3"></i>
+                  Scenarios
+                </h1>
+                <div>
+                  <button
+                    onClick={handleNavigateToScenarioRunner}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors mr-2"
+                  >
+                    <i className="fas fa-rocket mr-2"></i>
+                    Go to Scenario Runner
+                  </button>
+                  <button
+                    onClick={handleNavigateToDashboard}
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                  >
+                    <i className="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                  </button>
+                </div>
+              </div>
+              
+              <ScenariosTab />
+            </div>
+          </div>
+        );
+
+      case 'new-scenario':
+        return (
+          <div className="flex-1 overflow-auto p-4">
+            <NewScenarioEditor
+              onSave={handleScenarioSaved}
+              onCancel={handleScenarioCancel}
+            />
+          </div>
+        );
+
+      case 'edit-scenario':
+        return (
+          <div className="flex-1 overflow-auto p-4">
+            <ScenarioEditor
+              scenarioName={selectedScenarioName}
+              onSave={handleScenarioSaved}
+              onCancel={handleScenarioCancel}
+            />
+          </div>
+        );
+
+      case 'scenario-runner':
+        return (
+          <div className="flex-1 overflow-auto p-4">
+            <ScenarioRunnerPage />
           </div>
         );
 
@@ -377,6 +515,9 @@ const ExplorerView = ({ initialDeployments }) => {
         selectedFacet={selectedFacet}
         currentView={currentView}
         onNavigateToDashboard={handleNavigateToDashboard}
+        onNavigateToNewScenario={handleNavigateToNewScenario}
+        onNavigateToEditScenario={handleNavigateToEditScenario}
+        onNavigateToScenarioRunner={handleNavigateToScenarioRunner}
       />
       <div className="flex-1 flex flex-col">
         {renderMainContent()}

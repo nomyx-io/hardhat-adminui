@@ -6,6 +6,7 @@ import path from "path";
 import * as fs from "fs-extra";
 import cors from "cors";
 import open from "open";
+import { findAvailablePort, getConfiguredPort } from "./utils/port-utils";
 
 // Import plugins to extend HRE
 import "hardhat-deploy";
@@ -21,6 +22,7 @@ import { createStorageRoutes } from "./routes/storage";
 import { createTransactionsRoutes } from "./routes/transactions";
 import { createDiamondsRoutes } from "./routes/diamonds";
 import { createDashboardRoutes } from "./routes/dashboard";
+import { createScenariosRoutes } from "./routes/scenarios";
 import { createStaticRoutes } from "./routes/static";
 
 /**
@@ -40,6 +42,7 @@ function createApp(hre: HardhatRuntimeEnvironment): express.Application {
     app.use(createTransactionsRoutes(hre));
     app.use(createDiamondsRoutes(hre));
     app.use(createDashboardRoutes(hre));
+    app.use(createScenariosRoutes(hre));
     
     // Static routes should be last to handle fallbacks
     app.use(createStaticRoutes());
@@ -78,13 +81,26 @@ task("admin:contracts", "Lists all deployed contracts on a given network")
 // --- MAIN UI TASK ---
 task("admin-ui", "Starts the Admin UI server").setAction(async (_, hre: HardhatRuntimeEnvironment) => {
     const app = createApp(hre);
-    const port = process.env.PORT || 3000;
+    
+    try {
+        const configuredPort = getConfiguredPort(hre);
+        const availablePort = await findAvailablePort(configuredPort);
+        
+        if (availablePort !== configuredPort) {
+            console.log(`🔄 Port ${configuredPort} is in use, using port ${availablePort} instead`);
+        }
 
-    app.listen(port, () => {
-        console.log(`\nHardhat Admin UI server started on http://localhost:${port}`);
-    });
+        app.listen(availablePort, () => {
+            console.log(`\n🌐 Hardhat Admin UI server started on http://localhost:${availablePort}`);
+            console.log(`📊 Admin UI available at http://localhost:${availablePort}`);
+        });
 
-    await new Promise(() => {});
+        await new Promise(() => {});
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`❌ Failed to start Admin UI server: ${errorMessage}`);
+        process.exit(1);
+    }
 });
 
 // --- OVERRIDE NODE TASK TO INCLUDE ADMIN UI ---
@@ -101,33 +117,47 @@ task("node", "Starts a JSON-RPC server with the Admin UI")
     // Start the Admin UI server using the modular app
     console.log("🌐 Starting Admin UI server...");
     const app = createApp(hre);
-    const port = process.env.PORT || 3000;
+    
+    try {
+        const configuredPort = getConfiguredPort(hre);
+        const availablePort = await findAvailablePort(configuredPort);
+        
+        if (availablePort !== configuredPort) {
+            console.log(`🔄 Port ${configuredPort} is in use, using port ${availablePort} instead`);
+        }
 
-    app.listen(port, async () => {
-        const apiUrl = `http://localhost:${port}`;
-        const uiUrl = `http://localhost:3001`;
-        console.log(`\n✅ Hardhat Admin UI server started on ${apiUrl}`);
-        console.log(`📊 Node RPC available at http://localhost:8545`);
-        
-        // Auto-launch browser unless disabled
-        const shouldLaunch = process.env.HARDHAT_ADMINUI_NO_LAUNCH !== 'true';
-        if (shouldLaunch) {
-            try {
-                console.log(`\n🌐 Opening browser at ${uiUrl}...`);
-                await open(uiUrl);
-                console.log(`✅ Browser launched successfully`);
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                console.warn(`⚠️  Failed to launch browser automatically: ${errorMessage}`);
-                console.log(`Please open your browser manually and visit: ${uiUrl}`);
+        app.listen(availablePort, async () => {
+            const apiUrl = `http://localhost:${availablePort}`;
+            const uiUrl = apiUrl; // UI is served from the same port
+            console.log(`\n✅ Hardhat Admin UI server started on ${apiUrl}`);
+            console.log(`📊 Node RPC available at http://localhost:8545`);
+            console.log(`🌐 Admin UI available at ${uiUrl}`);
+            
+            // Auto-launch browser unless disabled
+            const shouldLaunch = process.env.HARDHAT_ADMINUI_NO_LAUNCH !== 'true';
+            if (shouldLaunch) {
+                try {
+                    console.log(`\n🌐 Opening browser at ${uiUrl}...`);
+                    await open(uiUrl);
+                    console.log(`✅ Browser launched successfully`);
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    console.warn(`⚠️  Failed to launch browser automatically: ${errorMessage}`);
+                    console.log(`Please open your browser manually and visit: ${uiUrl}`);
+                }
             }
-        }
-        
-        console.log(`\n🎯 Your development environment is ready!`);
-        if (!shouldLaunch) {
-            console.log(`💡 Browser auto-launch disabled. Visit: ${uiUrl}`);
-        }
-    });
+            
+            console.log(`\n🎯 Your development environment is ready!`);
+            if (!shouldLaunch) {
+                console.log(`💡 Browser auto-launch disabled. Visit: ${uiUrl}`);
+            }
+        });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`❌ Failed to start Admin UI server: ${errorMessage}`);
+        console.log(`💡 Try specifying a different port with HARDHAT_ADMINUI_PORT environment variable`);
+        process.exit(1);
+    }
 
     // Wait for both the node and UI server to run
     await nodePromise;

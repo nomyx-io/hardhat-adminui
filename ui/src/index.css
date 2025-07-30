@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import FontAwesome icons */
+@import '@fortawesome/fontawesome-free/css/all.css';
+
 /* Import modern fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
 

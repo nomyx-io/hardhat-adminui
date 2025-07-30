@@ -8,6 +8,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import open from 'open';
 import { FunctionSignatureDecoder } from "./services/functionSignatureDecoder";
+import { findAvailablePort } from "./utils/port-utils";
 
 // Export the type so it can be imported in other files
 export interface AdminUIDeployment extends Deployment {
@@ -40,35 +41,61 @@ declare module "hardhat/types/runtime" {
 }
 
 extendEnvironment((hre) => {
-  const wss = new WebSocketServer({ port: 8080 });
+  // Initialize WebSocket server asynchronously to avoid blocking environment setup
+  let wss: WebSocketServer;
+  const initWebSocketServer = async () => {
+    try {
+      const wsPort = await findAvailablePort(8080);
+      if (wsPort !== 8080) {
+        console.log(`🔄 WebSocket port 8080 in use, using port ${wsPort} instead`);
+      }
+      wss = new WebSocketServer({ port: wsPort });
+    } catch (error) {
+      console.warn(`⚠️  Could not find available WebSocket port, using default 8080`);
+      wss = new WebSocketServer({ port: 8080 });
+    }
+    
+    setupWebSocketHandlers();
+  };
 
-  wss.on('connection', ws => {
-    console.log('Admin UI client connected');
+  const setupWebSocketHandlers = () => {
+    if (!wss) return;
 
-    ws.on('message', async (message) => {
-      try {
-        const { type, data } = JSON.parse(message.toString());
-        if (type === 'verifyContract') {
-          await hre.adminUI.verifyContract(data.contractName);
-        } else if (type === 'simulateTransaction') {
-          const result = await hre.adminUI.simulateTransaction(data.from, data.to, data.data, data.value);
-          ws.send(JSON.stringify({ type: 'simulationResult', data: result }));
+    wss.on('connection', ws => {
+      console.log('Admin UI client connected');
+
+      ws.on('message', async (message) => {
+        try {
+          const { type, data } = JSON.parse(message.toString());
+          if (type === 'verifyContract') {
+            await hre.adminUI.verifyContract(data.contractName);
+          } else if (type === 'simulateTransaction') {
+            const result = await hre.adminUI.simulateTransaction(data.from, data.to, data.data, data.value);
+            ws.send(JSON.stringify({ type: 'simulationResult', data: result }));
+          }
+        } catch (e) {
+          console.error('Error processing message from client:', e);
         }
-      } catch (e) {
-        console.error('Error processing message from client:', e);
-      }
-    });
+      });
 
-    ws.on('close', () => console.log('Admin UI client disconnected'));
-  });
-
-  const broadcast = (message: object) => {
-    wss.clients.forEach((client: WebSocket) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
-      }
+      ws.on('close', () => console.log('Admin UI client disconnected'));
     });
   };
+
+  const broadcast = (message: object) => {
+    if (wss && wss.clients) {
+      wss.clients.forEach((client: WebSocket) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(message));
+        }
+      });
+    }
+  };
+
+  // Initialize WebSocket server asynchronously
+  initWebSocketServer().catch(error => {
+    console.error('Failed to initialize WebSocket server:', error);
+  });
 
   const deploymentsPath = hre.config.paths.deployments;
   let deploymentTimeout: NodeJS.Timeout;

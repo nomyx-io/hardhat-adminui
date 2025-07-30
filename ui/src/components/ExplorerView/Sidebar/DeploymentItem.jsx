@@ -20,7 +20,51 @@ const DeploymentItem = ({ deployment, isSelected, onSelect, isFavorite, onToggle
   
   const isDiamond = isDiamondContract(deployment);
   
-  const iconClass = isDiamond ? "fas fa-gem text-yellow-500" : "fas fa-file-contract text-primary";
+  // Get contract-specific icon based on contract name
+  const getContractIcon = (contractName) => {
+    const name = contractName.toLowerCase();
+    
+    if (isDiamond) {
+      return "fas fa-gem text-yellow-500";
+    }
+    
+    // Contract-specific icons
+    if (name.includes('token') || name.includes('erc20')) {
+      return "fas fa-coins text-green-500";
+    }
+    if (name.includes('marketplace') || name.includes('market')) {
+      return "fas fa-store text-purple-500";
+    }
+    if (name.includes('storage')) {
+      return "fas fa-database text-blue-500";
+    }
+    if (name.includes('nft') || name.includes('erc721')) {
+      return "fas fa-image text-indigo-500";
+    }
+    if (name.includes('registry')) {
+      return "fas fa-address-book text-orange-500";
+    }
+    if (name.includes('factory')) {
+      return "fas fa-industry text-gray-500";
+    }
+    if (name.includes('pool') || name.includes('liquidity')) {
+      return "fas fa-swimming-pool text-cyan-500";
+    }
+    if (name.includes('vault') || name.includes('treasury')) {
+      return "fas fa-vault text-amber-500";
+    }
+    if (name.includes('proxy')) {
+      return "fas fa-random text-teal-500";
+    }
+    if (name.includes('oracle')) {
+      return "fas fa-eye text-violet-500";
+    }
+    
+    // Default contract icon
+    return "fas fa-file-contract text-primary";
+  };
+  
+  const iconClass = getContractIcon(deployment.contractName);
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
