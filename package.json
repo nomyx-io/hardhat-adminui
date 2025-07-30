@@ -1,6 +1,6 @@
 {
   "name": "@nomyx/hardhat-adminui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A comprehensive Hardhat plugin providing a web-based admin UI for deployed smart contracts with Diamond proxy support, contract interaction, event monitoring, and deployment dashboard.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
