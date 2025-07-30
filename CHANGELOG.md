@@ -92,6 +92,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed WebSocket Port Conflicts** - Resolved EADDRINUSE errors with dynamic WebSocket port assignment
 - **Fixed Scenario Discovery** - Enhanced scenario file detection to prevent "Scenario not found" errors
 - **Fixed Legacy Scenario Support** - Backward compatibility with existing .js scenario files
+- **Fixed ES6 Module Errors** - Converted scenario files from ES6 to CommonJS format for Node.js compatibility
+- **Fixed JSON Parsing Errors** - Enhanced scenario engine parameter handling with safe template processing
+- **Fixed Route Ordering Issues** - Corrected Express route ordering to prevent `/api/scenarios/history` conflicts
 
 ### Documentation
 - **Comprehensive README Updates**

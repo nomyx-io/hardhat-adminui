@@ -1,11 +1,11 @@
-export const metadata = {
+const metadata = {
   name: "ERC20 Token Contract Tests",
   description: "Comprehensive testing scenarios for the SimpleToken ERC20 implementation",
   tags: ["token", "erc20", "integration", "security"],
   version: "1.0.0"
 };
 
-export const scenarios = [
+const scenarios = [
   {
     name: "Token Metadata and Initial State",
     description: "Verify token deployment parameters and initial state",
@@ -403,7 +403,7 @@ export const scenarios = [
   }
 ];
 
-export const setup = async (hre) => {
+const setup = async (hre) => {
   console.log("Setting up ERC20 Token test environment...");
   
   const [owner, user1, user2, user3] = await hre.ethers.getSigners();
@@ -444,7 +444,7 @@ export const setup = async (hre) => {
   };
 };
 
-export const teardown = async (hre, setupData) => {
+const teardown = async (hre, setupData) => {
   console.log("Cleaning up ERC20 Token test environment...");
   
   // Log final balances
@@ -459,4 +459,11 @@ export const teardown = async (hre, setupData) => {
     const balance = await token.balanceOf(signer.address);
     console.log(`${name} (${signer.address}): ${hre.ethers.formatUnits(balance, 18)} tokens`);
   }
+};
+
+module.exports = {
+  metadata,
+  scenarios,
+  setup,
+  teardown
 };

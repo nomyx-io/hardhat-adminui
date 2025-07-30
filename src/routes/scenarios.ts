@@ -19,17 +19,7 @@ export function createScenariosRoutes(hre: HardhatRuntimeEnvironment): Router {
     }
   });
 
-  router.get("/api/scenarios/:name", async (req, res) => {
-    try {
-      const { name } = req.params;
-      const scenario = await scenarioService.getScenario(name);
-      res.json(scenario);
-    } catch (error) {
-      console.error('Error getting scenario:', error);
-      res.status(500).json({ error: 'Failed to get scenario' });
-    }
-  });
-
+  // Specific routes must come BEFORE parameterized routes
   router.post("/api/scenarios/run-batch", async (req, res) => {
     const { scenarios } = req.body;
     if (!scenarios || !Array.isArray(scenarios)) {
@@ -69,6 +59,18 @@ export function createScenariosRoutes(hre: HardhatRuntimeEnvironment): Router {
     } catch (error) {
       console.error('Error getting execution details:', error);
       res.status(500).json({ error: 'Failed to get execution details' });
+    }
+  });
+
+  // Parameterized routes must come AFTER specific routes
+  router.get("/api/scenarios/:name", async (req, res) => {
+    try {
+      const { name } = req.params;
+      const scenario = await scenarioService.getScenario(name);
+      res.json(scenario);
+    } catch (error) {
+      console.error('Error getting scenario:', error);
+      res.status(500).json({ error: 'Failed to get scenario' });
     }
   });
 

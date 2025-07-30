@@ -1,11 +1,11 @@
-export const metadata = {
+const metadata = {
   name: "Diamond Proxy Contract Tests",
   description: "Comprehensive testing scenarios for the EIP-2535 Diamond Standard implementation",
   tags: ["diamond", "proxy", "eip-2535", "integration", "architecture"],
   version: "1.0.0"
 };
 
-export const scenarios = [
+const scenarios = [
   {
     name: "Diamond Core Functionality",
     description: "Test basic diamond proxy functionality and introspection",
@@ -382,7 +382,7 @@ export const scenarios = [
   }
 ];
 
-export const setup = async (hre) => {
+const setup = async (hre) => {
   console.log("Setting up Diamond Proxy test environment...");
   
   const [owner, user1, user2] = await hre.ethers.getSigners();
@@ -437,7 +437,7 @@ export const setup = async (hre) => {
   };
 };
 
-export const teardown = async (hre, setupData) => {
+const teardown = async (hre, setupData) => {
   console.log("Cleaning up Diamond Proxy test environment...");
   
   const { contracts } = setupData;
@@ -462,4 +462,11 @@ export const teardown = async (hre, setupData) => {
   } catch (error) {
     console.log("Could not retrieve final facet information:", error.message);
   }
+};
+
+module.exports = {
+  metadata,
+  scenarios,
+  setup,
+  teardown
 };

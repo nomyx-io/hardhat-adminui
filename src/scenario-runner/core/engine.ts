@@ -78,8 +78,26 @@ export class ScenarioEngine {
     // TODO: Implement a state management solution
     const templateContext = {};
 
-    const compiledParamsString = template(JSON.stringify(step.params), templateOptions)(templateContext);
-    const compiledParams = JSON.parse(compiledParamsString);
+    // Safely handle params compilation
+    let compiledParams: any = {};
+    try {
+      if (step.params && typeof step.params === 'object') {
+        const paramsString = JSON.stringify(step.params);
+        const compiledParamsString = template(paramsString, templateOptions)(templateContext);
+        
+        // Ensure we have valid JSON before parsing
+        if (compiledParamsString && compiledParamsString.trim()) {
+          compiledParams = JSON.parse(compiledParamsString);
+        } else {
+          compiledParams = step.params; // Fallback to original params
+        }
+      } else if (step.params) {
+        compiledParams = step.params;
+      }
+    } catch (templateError) {
+      console.warn(`Template processing failed for step "${step.description || step.task}":`, templateError);
+      compiledParams = step.params || {}; // Fallback to original params
+    }
 
     try {
       const startTime = Date.now();

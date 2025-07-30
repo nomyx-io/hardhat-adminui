@@ -1,11 +1,11 @@
-export const metadata = {
+const metadata = {
   name: "Marketplace Contract Tests",
   description: "Comprehensive testing scenarios for the decentralized marketplace contract",
   tags: ["marketplace", "ecommerce", "integration", "security"],
   version: "1.0.0"
 };
 
-export const scenarios = [
+const scenarios = [
   {
     name: "Marketplace Initial State",
     description: "Verify marketplace deployment and initial configuration",
@@ -615,7 +615,7 @@ export const scenarios = [
   }
 ];
 
-export const setup = async (hre) => {
+const setup = async (hre) => {
   console.log("Setting up Marketplace test environment...");
   
   const [owner, user1, user2, user3] = await hre.ethers.getSigners();
@@ -664,7 +664,7 @@ export const setup = async (hre) => {
   };
 };
 
-export const teardown = async (hre, setupData) => {
+const teardown = async (hre, setupData) => {
   console.log("Cleaning up Marketplace test environment...");
   
   const { contracts, signers } = setupData;
@@ -713,4 +713,11 @@ export const teardown = async (hre, setupData) => {
   } catch (error) {
     console.log("Error getting final marketplace state:", error.message);
   }
+};
+
+module.exports = {
+  metadata,
+  scenarios,
+  setup,
+  teardown
 };
