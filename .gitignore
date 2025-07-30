@@ -29,3 +29,5 @@ cache
 
 deployments
 .scenarios-history.json
+
+*.tgz
