@@ -1,0 +1,84 @@
+# Development files
+.git/
+.github/
+.vscode/
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts (keep only dist/)
+src/
+tsconfig.json
+ui/src/
+ui/public/
+ui/package.json
+ui/package-lock.json
+ui/node_modules/
+
+# Test files
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+tests/
+test/
+coverage/
+
+# Development contracts and artifacts
+contracts/
+artifacts/
+cache/
+deployments/
+scripts/
+deploy/
+
+# Documentation development
+docs/
+*.md.bak
+ENHANCEMENT_ROADMAP.md
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Development configuration
+hardhat.config.ts
+hardhat.config.js
+.hardhat/
+
+# Package manager files we don't need in published package
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Only include what's needed for the plugin to work:
+# - dist/ (compiled TypeScript)
+# - ui/build/ (built React app)
+# - package.json
+# - README.md
+# - LICENSE

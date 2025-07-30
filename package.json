@@ -1,0 +1,80 @@
+{
+  "name": "@nomyx/hardhat-adminui",
+  "version": "1.0.0",
+  "description": "A comprehensive Hardhat plugin providing a web-based admin UI for deployed smart contracts with Diamond proxy support, contract interaction, event monitoring, and deployment dashboard.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "bin": {
+    "hardhat-adminui": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src/**/*",
+    "ui/build/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:ui": "cd ui && npm install && npm run build",
+    "build": "npm run build:ui && tsc",
+    "watch": "tsc -w",
+    "dev": "concurrently \"node scripts/start-node.js\" \"npm start --prefix ui\"",
+    "prepublishOnly": "npm run build",
+    "clean": "rimraf dist ui/build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hardhat",
+    "hardhat-plugin",
+    "ethereum",
+    "smart-contracts",
+    "blockchain",
+    "diamond-proxy",
+    "eip-2535",
+    "web-ui",
+    "contract-interaction",
+    "deployment-dashboard",
+    "event-monitoring"
+  ],
+  "author": "Nomyx <info@nomyx.io>",
+  "license": "MIT",
+  "homepage": "https://github.com/nomyx-io/hardhat-adminui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomyx-io/hardhat-adminui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nomyx-io/hardhat-adminui/issues"
+  },
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "fs-extra": "^11.3.0",
+    "open": "^8.4.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/fs-extra": "^11.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.5.0",
+    "@types/open": "^6.2.1",
+    "@types/ws": "^8.18.1",
+    "concurrently": "^8.2.2",
+    "hardhat": "^2.17.1",
+    "rimraf": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "peerDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "ethers": "^5.0.0",
+    "hardhat": "^2.0.0",
+    "hardhat-deploy": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
